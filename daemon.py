@@ -1,6 +1,7 @@
 import requests
 import json
 import time
+import sys
 
 last_price = {"ethjpy": 0, "btcjpy": 0}
 # curl -X POST -H 'Content-type: application/json' --data '{"text":"Hello, World!"}' https://hooks.slack.com/services/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
@@ -21,7 +22,7 @@ def getDeltaRate(cur, last):
     return round(((cur / last) - 1) * 100, ndigits=3)
 
 
-def postSlack(text):
+def postSlack(post_url, text):
     headers = {
         'Content-type': 'application/json',
     }
@@ -29,7 +30,7 @@ def postSlack(text):
         'text': text
     }
     json_str = json.dumps(data)
-    resp = requests.post(slack_post_url, data=json_str, headers=headers)
+    resp = requests.post(post_url, data=json_str, headers=headers)
     print("post status :", resp.text)
 
 
@@ -56,7 +57,7 @@ def getCoinInfo(market, coin):
     return {"price": current, "last_price" : last, "ask": asks_total, "bid": bids_total, "delta": delta}
 
 
-def run():
+def run(post_url):
     # market = "bitflyer"
     # coin = "ethjpy"
     while(True):
@@ -75,10 +76,12 @@ ASK : {btc_info['ask']}
 BID : {btc_info['bid']}
         """
 
-        postSlack(text)
+        postSlack(post_url, text)
         time.sleep(period)
 
 
 if __name__ == "__main__":
-    run()
+    url = sys.argv[1]
+    print(url)
+    run(url)
 

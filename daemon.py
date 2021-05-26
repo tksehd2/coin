@@ -66,12 +66,12 @@ def run(post_url):
 
         text = f"""
 ETH/JPY : {eth_info['price']}({eth_info['delta']}) 
-가격변동률 : rate({getDeltaRate(eth_info['price'] , eth_info['last_price'])}%)
+가격변동률 : {getDeltaRate(eth_info['price'] , eth_info['last_price'])}%
 ASK : {eth_info['ask']}
 BID : {eth_info['bid']}
 
 BTC/JPY : {btc_info['price']}({btc_info['delta']}) 
-가격변동률 : rate({getDeltaRate(btc_info['price'] , btc_info['last_price'])}%)
+가격변동률 : {getDeltaRate(btc_info['price'] , btc_info['last_price'])}%
 ASK : {btc_info['ask']}
 BID : {btc_info['bid']}
 ---------------------------

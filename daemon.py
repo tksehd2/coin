@@ -3,7 +3,8 @@ import json
 import time
 
 last_price = {"ethjpy": 0, "btcjpy": 0}
-slack_post_url = "https://hooks.slack.com/services/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"
+# curl -X POST -H 'Content-type: application/json' --data '{"text":"Hello, World!"}' https://hooks.slack.com/services/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
+slack_post_url = "https://hooks.slack.com/services/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"
 period = 180
 
 def getTotalStock(items):
@@ -28,7 +29,6 @@ def postSlack(text):
         'text': text
     }
     json_str = json.dumps(data)
-    print(slack_post_url)
     resp = requests.post(slack_post_url, data=json_str, headers=headers)
     print("post status :", resp.text)
 

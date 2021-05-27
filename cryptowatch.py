@@ -4,8 +4,7 @@ import time
 import sys
 
 last_price = {"ethjpy": 0, "btcjpy": 0}
-# curl -X POST -H 'Content-type: application/json' --data '{"text":"Hello, World!"}' https://hooks.slack.com/services/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
-slack_post_url = "https://hooks.slack.com/services/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"
+slack_token = "TAWSVC1TJ/B023EDHPMFW/N3VhuoXrRO30B6oghvpFL3SE"
 api_key = "02213GI7UV4W05LZC2PN"
 period = 180
 
@@ -30,7 +29,7 @@ def postSlack(text):
     data = {
         'text': text
     }
-    post_url = "https://hooks.slack.com/services/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"
+    post_url = f"https://hooks.slack.com/services/{slack_token}"
     json_str = json.dumps(data)
     resp = requests.post(post_url, data=json_str, headers=headers)
     print("post status :", resp.text)

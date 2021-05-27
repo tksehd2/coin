@@ -50,7 +50,7 @@ def postSlack(text):
         'text': text
     }
     json_str = json.dumps(data)
-    post_url = "https://hooks.slack.com/services/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"
+    post_url = f"https://hooks.slack.com/services/{slack_token}"
     resp = requests.post(post_url, data=json_str, headers=headers)
     print("post status :", resp.text)
 

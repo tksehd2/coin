@@ -23,13 +23,14 @@ def getDeltaRate(cur, last):
     return round(((cur / last) - 1) * 100, ndigits=3)
 
 
-def postSlack(post_url, text):
+def postSlack(text):
     headers = {
         'Content-type': 'application/json',
     }
     data = {
         'text': text
     }
+    post_url = "https://hooks.slack.com/services/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"
     json_str = json.dumps(data)
     resp = requests.post(post_url, data=json_str, headers=headers)
     print("post status :", resp.text)
@@ -58,7 +59,7 @@ def getCoinInfo(market, coin):
     return {"price": current, "last_price" : last, "ask": asks_total, "bid": bids_total, "delta": delta}
 
 
-def run(post_url):
+def run():
     # market = "bitflyer"
     # coin = "ethjpy"
     while(True):
@@ -78,12 +79,10 @@ BID : {btc_info['bid']}
 ---------------------------
         """
 
-        postSlack(post_url, text)
+        postSlack( text)
         time.sleep(period)
 
 
 if __name__ == "__main__":
-    url = sys.argv[1]
-    print(url)
-    run(url)
+    run()
 

@@ -6,6 +6,7 @@ import sys
 last_price = {"ethjpy": 0, "btcjpy": 0}
 # curl -X POST -H 'Content-type: application/json' --data '{"text":"Hello, World!"}' https://hooks.slack.com/services/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
 slack_post_url = "https://hooks.slack.com/services/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"
+api_key = "02213GI7UV4W05LZC2PN"
 period = 180
 
 def getTotalStock(items):
@@ -35,8 +36,8 @@ def postSlack(post_url, text):
 
 
 def getCoinInfo(market, coin):
-    price_url = f"https://api.cryptowat.ch/markets/{market}/{coin}/price"
-    order_url = f"https://api.cryptowat.ch/markets/{market}/{coin}/orderbook"
+    price_url = f"https://api.cryptowat.ch/markets/{market}/{coin}/price?apikey={api_key}"
+    order_url = f"https://api.cryptowat.ch/markets/{market}/{coin}/orderbook?apikey={api_key}"
 
     price_resp = requests.get(price_url)
     order_resp = requests.get(order_url)

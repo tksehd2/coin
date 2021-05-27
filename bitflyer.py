@@ -9,7 +9,7 @@ BTC_JPY = "BTC_JPY"
 
 last_price = {ETH_JPY: 0, BTC_JPY: 0}
 coin_name = {ETH_JPY: "ETH/JPY", BTC_JPY: "BTC/JPY"}
-
+slack_token = "TAWSVC1TJ/B023EDHPMFW/N3VhuoXrRO30B6oghvpFL3SE"
 period = 180
 
 def getTotalStock(items):

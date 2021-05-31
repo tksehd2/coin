@@ -12,19 +12,22 @@ LAST_PRICE = "LP"
 LAST_SELL = "LS"
 LAST_BUY = "LB"
 LAST_TOTAL_COUNT = "LTC"
+LAST_ID = "LI"
 
 last = {
     ETH_JPY : {
         LAST_PRICE : 0,
         LAST_SELL : 0,
         LAST_BUY  : 0,
-        LAST_TOTAL_COUNT : 0
+        LAST_TOTAL_COUNT : 0,
+        LAST_ID : 1000000000
     },
     BTC_JPY : {
         LAST_PRICE : 0,
         LAST_SELL : 0,
         LAST_BUY  : 0,
-        LAST_TOTAL_COUNT : 0
+        LAST_TOTAL_COUNT : 0,
+        LAST_ID : 1000000000,
     }
 }
 
@@ -64,9 +67,8 @@ def getVolume(coin_pair):
         "sell_child_order_acceptance_id": "JRF20210531-120952-314907"
     },
     """
-    count = 1000
-    after = 500
-    url = f"https://api.bitflyer.com/v1/executions?product_code={coin_pair}&count={count}&after={after}"
+    count = 500
+    url = f"https://api.bitflyer.com/v1/executions?product_code={coin_pair}&count={count}&after={last[coin_pair][LAST_ID]}"
     resp = requests.get(url)
     resp_json = json.loads(resp.text)
 
@@ -78,6 +80,7 @@ def getVolume(coin_pair):
         if item_date < last_time:
             break
 
+        last[coin_pair][LAST_ID] = item["id"]
         volume["total_count"] += 1
         if "BUY" in item["side"]:
             volume["total_buy"] += item["size"]
@@ -90,7 +93,7 @@ def getVolume(coin_pair):
 
     volume['total_buy'] = round(volume['total_buy'], ndigits=2)
     volume['total_sell'] = round(volume['total_sell'], ndigits=2)
-        
+
     return volume
 
 

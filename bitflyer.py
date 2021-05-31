@@ -84,12 +84,12 @@ def getVolume(coin_pair):
         else:
             volume["total_sell"] += item["size"]
 
+    volume["delta_count"] = getDelta(coin_pair, LAST_TOTAL_COUNT, volume["total_count"])
+    volume["delta_buy"] = round(getDelta(coin_pair, LAST_BUY, volume["total_buy"]) , ndigits=2)
+    volume["delta_sell"] = round(getDelta(coin_pair, LAST_SELL, volume["total_sell"]), ndigits=2)
+
     volume['total_buy'] = round(volume['total_buy'], ndigits=2)
     volume['total_sell'] = round(volume['total_sell'], ndigits=2)
-
-    volume["delta_count"] = getDelta(coin_pair, LAST_TOTAL_COUNT, volume["total_count"])
-    volume["delta_buy"] = getDelta(coin_pair, LAST_BUY, volume["total_buy"])
-    volume["delta_sell"] = getDelta(coin_pair, LAST_SELL, volume["total_sell"])
         
     return volume
 
@@ -100,9 +100,9 @@ def getCoinInfo(coin_pair):
     resp_json = json.loads(resp.text)
 
     current = resp_json["mid_price"]
-    delta = getDelta(coin_pair , LAST_PRICE, current)
     delta_rate = getDeltaRate(current, last[coin_pair][LAST_PRICE])
-
+    delta = getDelta(coin_pair , LAST_PRICE, current)
+    
     bids = getTotalStock(resp_json["bids"])
     asks = getTotalStock(resp_json["asks"])
 
@@ -142,11 +142,10 @@ def makeText(info):
     return f"""
 {info['name']} : {info['price']} ({info['delta']}) 
 가격변동률 : {info['delta_rate']}%
-Asks : {info['asks']}
-Bids : {info['bids']}
 거래량: {info['total_count']}건 ({info['delta_count']})
 매수량 : {info['total_buy']}개 ({info['delta_buy']})
-매도량 : {info['total_sell']}개 ({info['delta_sell']})"""
+매도량 : {info['total_sell']}개 ({info['delta_sell']})
+Asks ({info['asks']}) / Bids ({info['bids']})"""
 
 
 def run():
@@ -167,3 +166,4 @@ def run():
 
 if __name__ == "__main__":
     run()
+    

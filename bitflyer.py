@@ -3,14 +3,40 @@ import json
 import time
 import sys
 from datetime import datetime
+from datetime import timedelta
 
 ETH_JPY = "ETH_JPY"
 BTC_JPY = "BTC_JPY"
 
-last_price = {ETH_JPY: 0, BTC_JPY: 0}
+LAST_PRICE = "LP"
+LAST_SELL = "LS"
+LAST_BUY = "LB"
+LAST_TOTAL_COUNT = "LTC"
+
+last = {
+    ETH_JPY : {
+        LAST_PRICE : 0,
+        LAST_SELL : 0,
+        LAST_BUY  : 0,
+        LAST_TOTAL_COUNT : 0
+    },
+    BTC_JPY : {
+        LAST_PRICE : 0,
+        LAST_SELL : 0,
+        LAST_BUY  : 0,
+        LAST_TOTAL_COUNT : 0
+    }
+}
+
 coin_name = {ETH_JPY: "ETH/JPY", BTC_JPY: "BTC/JPY"}
 slack_token = "TAWSVC1TJ/B023EDHPMFW/N3VhuoXrRO30B6oghvpFL3SE"
 period = 180
+last_time = datetime.utcnow() + timedelta(seconds=-period)
+
+def getDelta(coin_pair, type, value):
+    delta = value -last[coin_pair][type]
+    last[coin_pair][type] = value
+    return delta
 
 def getTotalStock(items):
     item = list()
@@ -25,21 +51,78 @@ def getDeltaRate(cur, last):
     return round(((cur / last) - 1) * 100, ndigits=3)
 
 
+def getVolume(coin_pair):
+    # GET /v1/executions'?product_code=ETH_JPY&count=100&after=500';
+    """
+    {
+        "id": 2221228246,
+        "side": "BUY",
+        "price": 282902,
+        "size": 0.01,
+        "exec_date": "2021-05-31T12:09:52.83",
+        "buy_child_order_acceptance_id": "JRF20210531-120952-366775",
+        "sell_child_order_acceptance_id": "JRF20210531-120952-314907"
+    },
+    """
+    count = 1000
+    after = 500
+    url = f"https://api.bitflyer.com/v1/executions?product_code={coin_pair}&count={count}&after={after}"
+    resp = requests.get(url)
+    resp_json = json.loads(resp.text)
+
+    volume = { "total_count" : 0 , "total_buy" :0, "total_sell" : 0 , "delta_count" : 0, "delta_buy" :0 , "delta_sell" : 0}
+
+    for item in resp_json:
+        time = item["exec_date"].split('.')[0]
+        item_date = datetime.strptime(time, "%Y-%m-%dT%H:%M:%S")
+        if item_date < last_time:
+            break
+
+        volume["total_count"] += 1
+        if "BUY" in item["side"]:
+            volume["total_buy"] += item["size"]
+        else:
+            volume["total_sell"] += item["size"]
+
+    volume['total_buy'] = round(volume['total_buy'], ndigits=2)
+    volume['total_sell'] = round(volume['total_sell'], ndigits=2)
+
+    volume["delta_count"] = getDelta(coin_pair, LAST_TOTAL_COUNT, volume["total_count"])
+    volume["delta_buy"] = getDelta(coin_pair, LAST_BUY, volume["total_buy"])
+    volume["delta_sell"] = getDelta(coin_pair, LAST_SELL, volume["total_sell"])
+        
+    return volume
+
+
 def getCoinInfo(coin_pair):
     url = f"https://api.bitflyer.com/v1/board?product_code={coin_pair}"
     resp = requests.get(url)
     resp_json = json.loads(resp.text)
 
-    last = last_price[coin_pair]
     current = resp_json["mid_price"]
-    delta = current - last
-    delta_rate = getDeltaRate(current, last)
-
-    last_price[coin_pair] = current
+    delta = getDelta(coin_pair , LAST_PRICE, current)
+    delta_rate = getDeltaRate(current, last[coin_pair][LAST_PRICE])
 
     bids = getTotalStock(resp_json["bids"])
     asks = getTotalStock(resp_json["asks"])
-    return {"name": coin_name[coin_pair], "price": current, "last_price" : last, "asks": asks, "bids": bids, "delta": delta, "delta_rate" : delta_rate}
+
+    volume = getVolume(coin_pair)
+
+    return { 
+        "name": coin_name[coin_pair],
+        "price": current,
+        "last_price": last[coin_pair][LAST_PRICE],
+        "asks": asks,
+        "bids": bids,
+        "delta": delta,
+        "delta_rate": delta_rate,
+        "total_count" : volume["total_count"],
+        "delta_count" : volume["delta_count"],
+        "total_buy" : volume["total_buy"],
+        "delta_buy" : volume["delta_buy"],
+        "total_sell" : volume["total_sell"],
+        "delta_sell" : volume["delta_sell"]
+    }
 
 
 def postSlack(text):
@@ -55,12 +138,15 @@ def postSlack(text):
     print("post status :", resp.text)
 
 
-def makeText(info):    
+def makeText(info):
     return f"""
-{info['name']} : {info['price']}({info['delta']}) 
+{info['name']} : {info['price']} ({info['delta']}) 
 가격변동률 : {info['delta_rate']}%
 Asks : {info['asks']}
-Bids : {info['bids']}"""    
+Bids : {info['bids']}
+거래량: {info['total_count']}건 ({info['delta_count']})
+매수량 : {info['total_buy']}개 ({info['delta_buy']})
+매도량 : {info['total_sell']}개 ({info['delta_sell']})"""
 
 
 def run():
@@ -74,10 +160,10 @@ def run():
 {makeText(btc_info)}
 --------------{now.strftime("%m/%d %H:%M")}--------------
 
-"""    
+"""
         postSlack(text)
-        time.sleep(period)     
+        time.sleep(period)
+
 
 if __name__ == "__main__":
     run()
-

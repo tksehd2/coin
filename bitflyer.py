@@ -151,12 +151,11 @@ Asks ({info['asks']}) / Bids ({info['bids']})"""
 def run():
     while True:
         eth_info = getCoinInfo(ETH_JPY)
-        btc_info = getCoinInfo(BTC_JPY)
+        # btc_info = getCoinInfo(BTC_JPY)
 
         now = datetime.now()
         text = f"""
 {makeText(eth_info)}
-{makeText(btc_info)}
 --------------{now.strftime("%m/%d %H:%M")}--------------
 
 """
@@ -166,4 +165,4 @@ def run():
 
 if __name__ == "__main__":
     run()
-    
+

@@ -22,7 +22,7 @@ class BitflyerBot:
 
             lastPrice = obj["ltp"]
 
-            if trail.state is '':
+            if trail.state == '':
                 trail.BuyOrder(lastPrice , 1500)
 
             trail.Tracking(lastPrice)

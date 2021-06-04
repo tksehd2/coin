@@ -24,7 +24,7 @@ class Trail:
                 self.initial_price = price + self.boundary
                 print( f'tracking {self.state} targetPrice: {self.initial_price} cur: {price}')
             elif self.initial_price <= price:
-                self.order_book.Buy(price , 0.05)
+                self.order_book.Buy(price , 0.3)
                 self.SellOrder(price , self.boundary)
 
         if "SELL" in self.state:

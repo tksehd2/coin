@@ -1,4 +1,4 @@
-from trail import Trail
+from trail import SMATrail
 import requests
 import json
 import time
@@ -15,15 +15,12 @@ class BitflyerBot:
         self.api = self.url + self.path + self.query
 
     def run(self):
-        trail = Trail()
+        trail = SMATrail(1500)
         while True:
             resp = requests.get(self.api)
             obj = json.loads(resp.text)
 
             lastPrice = obj["ltp"]
-
-            if trail.state == '':
-                trail.BuyOrder(lastPrice , 1500)
 
             trail.Tracking(lastPrice)
             
